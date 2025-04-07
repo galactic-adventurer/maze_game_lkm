@@ -9,8 +9,8 @@
 			status = "okay";
 			#address-cells = <0x01>;
 			#size-cells = <0x0>;
-			mpu_6050: mpu_6050@68 {
-				compatible = "mpu_6050";
+			mpu6050: mpu6050@68 {
+				compatible = "mpu6050", "icm20689";
 				reg = <0x68>;
 			};
 		};
