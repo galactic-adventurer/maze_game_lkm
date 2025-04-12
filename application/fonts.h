@@ -1,0 +1,18 @@
+#ifndef __FONTS_H__
+#define __FONTS_H__
+
+//#include <stdint.h>
+//#include <linux/types.h>
+
+typedef struct {
+    const u8 width;
+    uint8_t height;
+    const uint16_t *data;
+} FontDef;
+
+
+//extern FontDef Font_7x10;
+//extern FontDef Font_11x18;
+//extern FontDef Font_16x26;
+
+#endif // __FONTS_H__

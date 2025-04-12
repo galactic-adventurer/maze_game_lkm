@@ -134,12 +134,13 @@ static int mpu6050_probe(struct i2c_client *client) {
   mpu6050_cdev.owner = THIS_MODULE;
   if (cdev_add(&mpu6050_cdev, dev_number, DEVICE_COUNT) < 0) {
     printk(KERN_ERR "Cannot add chardev\n");
-    return -ENOMEM;
+    goto err;
   }
 
   // Create sysfs class
   mpu6050_class = class_create(DEVICE_NAME);
   if (IS_ERR(mpu6050_class)) {
+    cdev_del(&mpu6050_cdev);
     printk(KERN_ERR "Cannot create sysfs class\n");
     goto err;
   }
@@ -149,14 +150,7 @@ static int mpu6050_probe(struct i2c_client *client) {
     class_destroy(mpu6050_class);
     goto err;
   }
-  goto success;
 
-err:
-  cdev_del(&mpu6050_cdev);
-  unregister_chrdev_region(dev_number, DEVICE_COUNT);
-  return -1;
-
-success:
   /* Initial device setup */
   /* No error handling here! */
   i2c_smbus_write_byte_data(client, REG_CONFIG, 0);
@@ -181,6 +175,11 @@ success:
 
   printk(KERN_INFO "i2c driver probed\n");
   return 0;
+
+err:
+  unregister_chrdev_region(dev_number, DEVICE_COUNT);
+  return -1;
+ 
 }
 
 /**
