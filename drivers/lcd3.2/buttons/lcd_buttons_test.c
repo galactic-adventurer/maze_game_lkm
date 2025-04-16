@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define DEVICE_PATH "/dev/lcd_buttons"
+#define DEVICE_PATH "/dev/lcd_button_char_dev"
 
 // Function for Thread 1: Wait for Button Interrupt
 void *interrupt_handler(void *arg) {

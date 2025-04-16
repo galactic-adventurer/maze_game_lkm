@@ -1,38 +1,31 @@
 /dts-v1/;
 /plugin/;
-
-&gpio {
-    fragment@0 {
-        target = <&gpio>;
-        __overlay__ {
-            button1: lcd_button1 {
-                compatible = "lcd_button";
-                gpios = <18 GPIO_ACTIVE_LOW>;
-                irq = <18>;
-            };
-        };
-    };
-
-    fragment@1 {
-        target = <&gpio>;
-        __overlay__ {
-            button2: lcd_button2 {
-                compatible = "lcd_button";
-                gpios = <23 GPIO_ACTIVE_LOW>;
-                irq = <23>;
-            };
-        };
-    };
-
-
-    fragment@2 {
-        target = <&gpio>;
-        __overlay__ {
-            button3: lcd_button3 {
-                compatible = "lcd_button";
-                gpios = <24 GPIO_ACTIVE_LOW>;
-                irq = <24>;
-            };
-        };
-    };
+/ {
+	compatible = "brcm,bcm2835";
+	fragment@0 {
+		target-path = "/";
+		__overlay__ {
+			lcd_button1 {
+				compatible = "lcd_button";
+				status = "okay";
+				id = <1>;
+				lcd-button-gpio = <&gpio 18 17>;
+                bias-pull-up;  
+			};
+            lcd_button2 {
+				compatible = "lcd_button";
+				status = "okay";
+				id = <2>;
+				lcd-button-gpio = <&gpio 23 17>;
+                bias-pull-up;  
+			};
+            lcd_button3 {
+				compatible = "lcd_button";
+				status = "okay";
+				id = <3>;
+				lcd-button-gpio = <&gpio 24 17>;
+                bias-pull-up; 
+			};
+		};
+	};
 };
