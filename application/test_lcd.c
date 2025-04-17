@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lcd_lib.h"
-#include "fonts.c"
 
 int main() {
 

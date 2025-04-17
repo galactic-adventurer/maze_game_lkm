@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include "fonts.h"
+
 #define LCD_DEV_FILE "/dev/lcd_display"
 #define LCD_WIDTH  320
 #define LCD_HEIGHT 240
@@ -15,8 +18,8 @@
 
 
 int lcd_write(void);
-int draw_filled_circle(u16 x, u16 y, u16 r, u16 color);
-int draw_filled_rect(u16 x,  u16 y, u16 w, u16 h, u16 color);
-int draw_full_screen(u16* buffer);
-int draw_char(u16 x, u16 y, char ch, FontDef font, u16 color, u16 bgcolor);
-int draw_str(u16 x, u16 y, const char* str, FontDef font, u16 color, u16 bgcolor);
+int draw_filled_circle(uint16_t x, uint16_t y, uint16_t r, uint16_t color);
+int draw_filled_rect(uint16_t x,  uint16_t y, uint16_t w, uint16_t h, uint16_t color);
+int draw_full_screen(uint16_t* buffer);
+int draw_char(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor);
+int draw_str(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor);

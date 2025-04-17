@@ -1,9 +1,10 @@
-#include "fonts.h"
 #include "lcd_lib.h"
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
 
-static u16 frame_buffer[LCD_WIDTH * LCD_HEIGHT];
+static uint16_t frame_buffer[LCD_WIDTH * LCD_HEIGHT];
 
 int lcd_write(){
     int fd = open(LCD_DEV_FILE, O_WRONLY);
@@ -20,13 +21,13 @@ int lcd_write(){
     return 0;
 }
 
-int draw_filled_circle(u16 x, u16 y, u16 r, u16 color){
+int draw_filled_circle(uint16_t x, uint16_t y, uint16_t r, uint16_t color){
     if ((x+r > LCD_WIDTH) || (y+r > LCD_HEIGHT)) {
         printf("lcd_lib Error: drawing out of screen bounds\n");
-        return -1
+        return -1;
 	}
-    for (u16 i=y-r; i<=y+r; i++) {
-        for (u16 j=x-r; j<=x+r; j++) {
+    for (uint16_t i=y-r; i<=y+r; i++) {
+        for (uint16_t j=x-r; j<=x+r; j++) {
             if ((y-i)*(y-i) + (x-j)*(x-j) <= r*r+1) {
                 frame_buffer[i + LCD_WIDTH * j] = (color >> 8) | (color << 8);
             }
@@ -36,30 +37,30 @@ int draw_filled_circle(u16 x, u16 y, u16 r, u16 color){
 }
 
 
-int draw_filled_rect(u16 x,  u16 y, u16 w, u16 h, u16 color){
+int draw_filled_rect(uint16_t x,  uint16_t y, uint16_t w, uint16_t h, uint16_t color){
     if ((x+w > LCD_WIDTH) || (y+h > LCD_HEIGHT)) {
         printf("lcd_lib Error: drawing out of screen bounds\n");
         return -1;
 	}
-    for (j = 0; j < h; j++) {
-		for (i = 0; i < w; i++) {
+    for (uint32_t j = 0; j < h; j++) {
+		for (uint32_t i = 0; i < w; i++) {
 			frame_buffer[(x + LCD_WIDTH * y) + (i + LCD_WIDTH * j)] = (color >> 8) | (color << 8);
 		}
 	}
     return 0;
 }
 
-int draw_full_screen(u16* buffer){
+int draw_full_screen(uint16_t* buffer){
     memcpy(frame_buffer, buffer, sizeof(frame_buffer));
     return 0;
 }
 
-int draw_char(u16 x, u16 y, char ch, FontDef font, u16 color, u16 bgcolor){
+int draw_char(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor){
     if ((x+font.width >= LCD_WIDTH) || (y+font.height >= LCD_HEIGHT)) {
         printf("lcd_lib Error: drawing out of screen bounds\n");
         return -1;
 	}
-    u32 i, b, j;
+    uint32_t i, b, j;
 
 	for (i = 0; i < font.height; i++) {
 		b = font.data[(ch - 32) * font.height + i];
@@ -74,10 +75,10 @@ int draw_char(u16 x, u16 y, char ch, FontDef font, u16 color, u16 bgcolor){
 			}
 		}
 	}
-    return 0
+    return 0;
 }
 
-int draw_str(u16 x, u16 y, const char* str, FontDef font, u16 color, u16 bgcolor){
+int draw_str(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor){
     while (*str) {
         if (x + font.width >= LCD_WIDTH) {
             x = 0;
@@ -92,7 +93,7 @@ int draw_str(u16 x, u16 y, const char* str, FontDef font, u16 color, u16 bgcolor
                 continue;
             }
         }
-        lcd_put_char(x, y, *str, font, color, bgcolor);
+        draw_char(x, y, *str, font, color, bgcolor);
         x += font.width;
         str++;
     }
