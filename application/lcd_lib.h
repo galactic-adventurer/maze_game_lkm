@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "fonts.h"
 
-#define LCD_DEV_FILE "/dev/lcd_display"
+#define LCD_DEV_FILE "/dev/lcd_ili9341"
 #define LCD_WIDTH  320
 #define LCD_HEIGHT 240
 

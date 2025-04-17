@@ -15,13 +15,13 @@ static void lcd_ili9341_reset(void)
 	gpio_set_value(LCD_PIN_RESET, 1);
 }
 
-static void lcd_ili9341_write_command(u8 cmd)
+static int lcd_ili9341_write_command(u8 cmd)
 {
 	gpio_set_value(LCD_PIN_DC, 0);
-	spi_write(lcd_spi_device, &cmd, sizeof(cmd));
+	return spi_write(lcd_spi_device, &cmd, sizeof(cmd));
 }
 
-void lcd_ili9341_write_data(u8 *buff, size_t buff_size)
+int lcd_ili9341_write_data(u8 *buff, size_t buff_size)
 {
 	size_t i = 0;
 	
@@ -31,7 +31,7 @@ void lcd_ili9341_write_data(u8 *buff, size_t buff_size)
 		i += DATA_SIZE;
 		buff_size -= DATA_SIZE;
 	}
-	spi_write(lcd_spi_device, buff + i, buff_size);
+	return spi_write(lcd_spi_device, buff + i, buff_size);
 }
 
 static void lcd_ili9341_set_address_window(u16 x0, u16 y0, u16 x1, u16 y1)

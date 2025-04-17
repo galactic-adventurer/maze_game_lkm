@@ -19,9 +19,9 @@ static struct cdev lcd_cdev;
 static struct spi_device *spi_dev = NULL;
 static dev_t dev_number; 
 
-inline void lcd_update_screen(void)
+inline int lcd_update_screen(void)
 {
-	lcd_ili9341_write_data((u8*)frame_buffer, sizeof(frame_buffer));
+	return lcd_ili9341_write_data((u8*)frame_buffer, sizeof(frame_buffer));
 }
 
 static ssize_t lcd_cdev_read(struct file *file, char __user *buffer, size_t len, loff_t *offset) {
@@ -42,7 +42,8 @@ static ssize_t lcd_cdev_write(struct file *file, const char __user *buffer, size
 
     offset += to_copy;
 
-    lcd_update_screen();
+    if (lcd_update_screen())
+        printk(KERN_ERR "Cannot update screen\n");
 
     return to_copy;
 }

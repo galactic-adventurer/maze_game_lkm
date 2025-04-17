@@ -18,6 +18,7 @@ int lcd_write(){
         printf("lcd_lib Error: Cannot write to device file\n");
         return ret;
     }
+    close(fd);
     return 0;
 }
 
