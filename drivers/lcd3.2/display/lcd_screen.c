@@ -3,10 +3,12 @@
 #include <linux/fs.h>
 #include <linux/uaccess.h>
 #include <linux/device.h>
+#include <linux/cdev.h>
 #include "ili9341.h"
 #include "ili9341_config.h"
 
-#define DEVICE_NAME "lcd_display"
+
+#define DEVICE_NAME "lcd_ili9341"
 #define DEVICE_COUNT 1
 
 #define DATA_SIZE	90
@@ -28,7 +30,7 @@ static ssize_t lcd_cdev_read(struct file *file, char __user *buffer, size_t len,
     if (copy_to_user(buffer, frame_buffer + *offset, to_copy))
         return -EFAULT;
 
-    offset += to_copy
+    offset += to_copy;
     return to_copy;
 }
 
@@ -38,7 +40,7 @@ static ssize_t lcd_cdev_write(struct file *file, const char __user *buffer, size
     if (copy_from_user(frame_buffer, buffer, to_copy))
         return -EFAULT;
 
-    offset += to_copy
+    offset += to_copy;
 
     lcd_update_screen();
 
@@ -69,21 +71,22 @@ static int lcd_spi_probe(struct spi_device *spi) {
     // Create sysfs class
     lcd_display_class = class_create(DEVICE_NAME);
     if (IS_ERR(lcd_display_class)) {
-        cdev_del(&mpu6050_cdev);
+        cdev_del(&lcd_cdev);
         printk(KERN_ERR "Cannot create sysfs class\n");
         goto err;
     }
 
     // Create device in /dev
-    static struct device *spiDevice = device_create(spiClass, NULL, MKDEV(majorNumber, 0), NULL, DEVICE_NAME);
+    struct device *spiDevice = device_create(lcd_display_class, NULL, dev_number, NULL, DEVICE_NAME);
     if (IS_ERR(spiDevice)) {
-        class_destroy(spiClass);
+        cdev_del(&lcd_cdev);
+        class_destroy(lcd_display_class);
         printk(KERN_ERR "Cannot create device in sysfs\n");
         goto err;
     }
 
     // Initialize lcd display
-    lcd_ili9341_init();
+    lcd_ili9341_init(spi_dev);
 
     printk(KERN_INFO "LCD SPI probed successfully\n");
     return 0;
@@ -95,32 +98,40 @@ err:
  
 }
 
-static int lcd_spi_remove(struct spi_device *spi) {
+static void lcd_spi_remove(struct spi_device *spi) {
     device_destroy(lcd_display_class, dev_number);
     class_destroy(lcd_display_class);
     cdev_del(&lcd_cdev);
     unregister_chrdev_region(dev_number, DEVICE_COUNT);
     printk(KERN_INFO "LCD SPI Device driver unregistered\n");
-    return 0;
 }
 
-static const struct of_device_id spi_of_match[] = {
+static const struct of_device_id lcd_of_match[] = {
     { .compatible = "lcd_ili9341" },
-    {}
+    { }
 };
-MODULE_DEVICE_TABLE(of, spi_of_match);
 
-static struct spi_driver spi_driver = {
+MODULE_DEVICE_TABLE(of, lcd_of_match);
+
+static struct spi_device_id lcd_spi_id[] = {
+	{"lcd_ili9341", 0},
+	{ },
+};
+MODULE_DEVICE_TABLE(spi, lcd_spi_id);
+
+
+static struct spi_driver lcd_spi_driver = {
     .driver = {
         .name = DEVICE_NAME,
         .owner = THIS_MODULE,
-        .of_match_table = spi_of_match,
+        .of_match_table = lcd_of_match,
     },
     .probe = lcd_spi_probe,
     .remove = lcd_spi_remove,
+    .id_table = lcd_spi_id,
 };
 
-module_spi_driver(spi_driver);
+module_spi_driver(lcd_spi_driver);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Chernoivanenko Viktoriia");

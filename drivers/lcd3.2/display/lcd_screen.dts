@@ -2,10 +2,24 @@
 /plugin/;
 
 / {
+    compatible = "brcm,bcm2835";
+
     fragment@0 {
+        target = <&spidev0>;
+
+        __overlay__ {
+            status = "disabled";
+        };
+    };
+
+    fragment@1 {
         target = <&spi0>; 
         __overlay__ {
-            lcd_display@0 {
+            status = "okay";
+			#address-cells = <1>;
+			#size-cells = <0>;
+            
+           lcd_ili9341: lcd_ili9341@0 {
                 compatible = "lcd_ili9341";
                 reg = <0>; // Chip select number
                 spi-max-frequency = <1000000>; // 1 MHz

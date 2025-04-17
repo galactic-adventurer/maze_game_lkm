@@ -2,6 +2,11 @@
 #include <linux/spi/spi.h>
 #include <linux/delay.h>
 #include "ili9341.h"
+#include "ili9341_config.h"
+
+#define DATA_SIZE	90
+
+static struct spi_device *lcd_spi_device;
 
 static void lcd_ili9341_reset(void)
 {
@@ -16,7 +21,7 @@ static void lcd_ili9341_write_command(u8 cmd)
 	spi_write(lcd_spi_device, &cmd, sizeof(cmd));
 }
 
-static void lcd_ili9341_write_data(u8 *buff, size_t buff_size)
+void lcd_ili9341_write_data(u8 *buff, size_t buff_size)
 {
 	size_t i = 0;
 	
@@ -50,9 +55,9 @@ static void lcd_ili9341_set_address_window(u16 x0, u16 y0, u16 x1, u16 y1)
 }
 
 
-void lcd_init_ili9341(void)
+void lcd_ili9341_init(struct spi_device *lcd_spi_dev)
 {
-
+	lcd_spi_device = lcd_spi_dev;
     gpio_request(LCD_PIN_RESET, "LCD_PIN_RESET");
     gpio_direction_output(LCD_PIN_RESET, 0);
     gpio_request(LCD_PIN_DC, "LCD_PIN_DC");
