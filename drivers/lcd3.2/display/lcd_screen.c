@@ -87,7 +87,13 @@ static int lcd_spi_probe(struct spi_device *spi) {
     }
 
     // Initialize lcd display
-    lcd_ili9341_init(spi_dev);
+    int ret = lcd_ili9341_init(spi_dev);
+    if (ret) {
+        cdev_del(&lcd_cdev);
+        class_destroy(lcd_display_class);
+        printk(KERN_ERR "Cannot initialize ili9341, error code %d\n", ret);
+        goto err;
+    }
 
     printk(KERN_INFO "LCD SPI probed successfully\n");
     return 0;

@@ -23,6 +23,9 @@
                 compatible = "lcd_ili9341";
                 reg = <0>; // Chip select number
                 spi-max-frequency = <1000000>; // 1 MHz
+                reset-gpio = <&gpio 27 0>; /* GPIO pin for reset */
+                dc-gpio = <&gpio 22 0>;    /* GPIO pin for data/command */
+
             };
         };
     };
