@@ -4,7 +4,7 @@
 #include "ili9341.h"
 #include "ili9341_config.h"
 
-#define DATA_SIZE	90
+#define DATA_SIZE 90
 
 static struct spi_device *lcd_spi_device;
 struct gpio_desc *reset_gpio_descr;
@@ -12,22 +12,22 @@ struct gpio_desc *dc_gpio_descr;
 
 static void lcd_ili9341_reset(void)
 {
-	gpiod_set_value(reset_gpio, 0);
+	gpiod_set_value(reset_gpio_descr, 0);
 	mdelay(5);
-	gpiod_set_value(reset_gpio, 1);
+	gpiod_set_value(reset_gpio_descr, 1);
 }
 
 static int lcd_ili9341_write_command(u8 cmd)
 {
-	gpiod_set_value(dc_gpio, 0);
+	gpiod_set_value(dc_gpio_descr, 0);
 	return spi_write(lcd_spi_device, &cmd, sizeof(cmd));
 }
 
 int lcd_ili9341_write_data(u8 *buff, size_t buff_size)
 {
 	size_t i = 0;
-	
-	gpiod_set_value(dc_gpio, 1);
+
+	gpiod_set_value(dc_gpio_descr, 1);
 	while (buff_size > DATA_SIZE) {
 		spi_write(lcd_spi_device, buff + i, DATA_SIZE);
 		i += DATA_SIZE;
@@ -63,13 +63,13 @@ int lcd_ili9341_init(struct spi_device *lcd_spi_dev)
 
 	struct device *dev = &lcd_spi_device->dev;
 
-	reset_gpio_descr = gpiod_get(dev, "reset", GPIOD_OUT);
+	reset_gpio_descr = gpiod_get(dev, "reset", GPIOD_OUT_HIGH);
     if(IS_ERR(reset_gpio_descr)) {
 		dev_err(dev, "Could not setup the reset GPIO\n");
 		return -1 * IS_ERR(reset_gpio_descr);
 	}
 
-	dc_gpio_descr = gpiod_get(dev, "dc", GPIOD_OUT);
+	dc_gpio_descr = gpiod_get(dev, "dc", GPIOD_OUT_LOW);
     if(IS_ERR(dc_gpio_descr)) {
 		dev_err(dev, "Could not setup the reset GPIO\n");
 		return -1 * IS_ERR(dc_gpio_descr);
@@ -222,4 +222,9 @@ int lcd_ili9341_init(struct spi_device *lcd_spi_dev)
 
     lcd_ili9341_set_address_window(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
 	return 0;
+}
+
+void lcd_ili9341_deinit(){
+    gpiod_put(reset_gpio_descr);
+    gpiod_put(dc_gpio_descr);
 }

@@ -21,7 +21,7 @@ static dev_t dev_number;
 
 inline int lcd_update_screen(void)
 {
-	return lcd_ili9341_write_data((u8*)frame_buffer, sizeof(frame_buffer));
+	return lcd_ili9341_write_data((u8*)frame_buffer, sizeof(u16) * LCD_WIDTH * LCD_HEIGHT);
 }
 
 static ssize_t lcd_cdev_read(struct file *file, char __user *buffer, size_t len, loff_t *offset) {
@@ -42,9 +42,9 @@ static ssize_t lcd_cdev_write(struct file *file, const char __user *buffer, size
 
     offset += to_copy;
 
-    if (lcd_update_screen())
+    if (lcd_update_screen() != 0)
         printk(KERN_ERR "Cannot update screen\n");
-
+    printk(KERN_INFO "Succesful write to lcd\n");
     return to_copy;
 }
 
@@ -99,13 +99,14 @@ static int lcd_spi_probe(struct spi_device *spi) {
     return 0;
 
 err:
-    
+
     unregister_chrdev_region(dev_number, DEVICE_COUNT);
     return -1;
- 
+
 }
 
 static void lcd_spi_remove(struct spi_device *spi) {
+    lcd_ili9341_deinit();
     device_destroy(lcd_display_class, dev_number);
     class_destroy(lcd_display_class);
     cdev_del(&lcd_cdev);

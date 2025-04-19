@@ -17,12 +17,12 @@ install: lcd_screen.dtbo lcd_display.ko
 	sudo cp lcd_screen.dtbo /boot/overlays/
 	sudo sh -c "echo 'dtoverlay=lcd_screen' >>/boot/config.txt"
 	sudo insmod lcd_display.ko
-	sudo overlay lcd_screen
+	sudo dtoverlay lcd_screen
 
 uninstall:
 	sudo rm -f /boot/overlays/lcd_screen.dtbo
 	sudo nano /boot/config.txt
 	sudo rmmod lcd_display.ko
 	sudo rmdir /sys/kernel/config/device-tree/overlays/*lcd_screen*
-	
+
 
