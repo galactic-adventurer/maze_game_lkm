@@ -13,13 +13,13 @@
 volatile sig_atomic_t process = 1;
 
 uint16_t mazes [LEVELS][LCD_HEIGHT][LCD_WIDTH];
-uint16_t init_ball_poses [LEVELS][2] = {{16, 3}, {10, 10}, {10, 10}};
+uint16_t init_ball_poses [LEVELS][2] = {{11, 144}, {10, 10}, {10, 10}};
 atomic_bool restart = ATOMIC_VAR_INIT(true);
 atomic_int new_level = ATOMIC_VAR_INIT(0);
 
 
 void * button_press_handler(void *arg) {
-    while (process) 
+    while (1) 
     {
         int button = get_button_pressed();
         atomic_store(&new_level, button-1);
@@ -35,7 +35,7 @@ void handle_exit(int sig)  {
 } 
 
 int main(){
-    signal(SIGINT, handle_exit);
+    //signal(SIGINT, handle_exit);
 
     int mpu_ret = mpu_open();
     int but_ret = buttons_open();
@@ -59,7 +59,7 @@ int main(){
     static int16_t accel_values[3];
     static int level;
 
-    while (process) 
+    while (1) 
     {
         if (atomic_load(&restart)) {
             level = atomic_load(&new_level);

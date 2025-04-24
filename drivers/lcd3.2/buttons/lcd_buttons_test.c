@@ -32,7 +32,7 @@ int main() {
 
     fd = open(DEVICE_PATH, O_RDONLY); // Open the device
     if (fd < 0) {
-        perror("Failed to open device");
+        perror("Failed to open buttons device");
         return EXIT_FAILURE;
     }
 

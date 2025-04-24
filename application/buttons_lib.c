@@ -9,7 +9,7 @@ char buffer[2];
 int buttons_open(){
     fd = open(BUTTONS_DEV_FILE, O_RDONLY);
     if (fd < 0) {
-      printf("Cannot open mpu device file...\n");
+      printf("Cannot open buttons device file...\n");
       return -1;
     }
     return 0;
