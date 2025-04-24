@@ -1,6 +1,6 @@
 #include <sys/ioctl.h>
-
-#define LCD_DEV_FILE "/dev/mpu6050"
+#include <stdint.h>
+#define MPU_DEV_FILE "/dev/mpu6050"
 #define ACCEL _IOR('m', 'a', int16_t *)
 
 
