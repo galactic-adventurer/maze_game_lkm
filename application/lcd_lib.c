@@ -23,7 +23,7 @@ int lcd_write(){
 }
 
 int draw_filled_circle(uint16_t x, uint16_t y, uint16_t r, uint16_t color){
-    if ((x+r > LCD_WIDTH) || (y+r > LCD_HEIGHT)) {
+    if ((x+r > LCD_HEIGHT) || (y+r > LCD_WIDTH)) {
         printf("lcd_lib Error: drawing out of screen bounds\n");
         return -1;
 	}
@@ -39,7 +39,7 @@ int draw_filled_circle(uint16_t x, uint16_t y, uint16_t r, uint16_t color){
 
 
 int draw_filled_rect(uint16_t x,  uint16_t y, uint16_t w, uint16_t h, uint16_t color){
-    if ((x+w > LCD_WIDTH) || (y+h > LCD_HEIGHT)) {
+    if ((x+w > LCD_HEIGHT) || (y+h > LCD_WIDTH)) {
         printf("lcd_lib Error: drawing out of screen bounds\n");
         return -1;
 	}
