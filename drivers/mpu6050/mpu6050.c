@@ -10,6 +10,7 @@
 #include <linux/mutex.h>
 #include <linux/uaccess.h>
 
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Chernoivanenko Viktoriia");
 MODULE_VERSION("1.0");
@@ -44,15 +45,16 @@ static int mpu6050_read_accel(void *args) {
   }
 
   while (!kthread_should_stop()) {
+    int16_t temp_accel_values[3];
+    temp_accel_values[0] = (s16)((u16)i2c_smbus_read_word_swapped(
+      mpu6050_data.client, REG_ACCEL_XOUT_H));
+    temp_accel_values[1] = (s16)((u16)i2c_smbus_read_word_swapped(
+      mpu6050_data.client, REG_ACCEL_YOUT_H));
+    temp_accel_values[2] = (s16)((u16)i2c_smbus_read_word_swapped(
+      mpu6050_data.client, REG_ACCEL_ZOUT_H));
     mutex_lock(&accel_lock);
-    mpu6050_data.accel_values[0] = (s16)((u16)i2c_smbus_read_word_swapped(
-        mpu6050_data.client, REG_ACCEL_XOUT_H));
-    mpu6050_data.accel_values[1] = (s16)((u16)i2c_smbus_read_word_swapped(
-        mpu6050_data.client, REG_ACCEL_YOUT_H));
-    mpu6050_data.accel_values[2] = (s16)((u16)i2c_smbus_read_word_swapped(
-        mpu6050_data.client, REG_ACCEL_ZOUT_H));
+    memcpy(mpu6050_data.accel_values, temp_accel_values, 6);
     mutex_unlock(&accel_lock);
-
     mdelay(100);
   }
 
