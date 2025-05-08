@@ -8,6 +8,7 @@
 #include <linux/uaccess.h>
 #include <linux/cdev.h>
 #include <linux/slab.h>
+#include <linux/atomic.h>
 
 MODULE_LICENSE("GPL");
 MODULE_VERSION("1.0");
@@ -19,8 +20,8 @@ static struct cdev lcd_buttons_cdev;
 static struct class *lcd_buttons_class;
 static dev_t dev_number;
 static wait_queue_head_t wait_queue;
-static int button_pressed = 0;
-static int last_button = 0;
+static atomic_t button_pressed = ATOMIC_INIT(0);
+static atomic_t last_button = ATOMIC_INIT(0);
 
 // File operations for character device
 static ssize_t read_button_number(struct file *filep, char *buffer, size_t len, loff_t *offset) {
@@ -28,9 +29,8 @@ static ssize_t read_button_number(struct file *filep, char *buffer, size_t len, 
     int ret;
 
     wait_event_interruptible(wait_queue, button_pressed);
-    button_pressed = 0;
-
-    snprintf(msg, sizeof(msg), "%d", last_button);
+    atomic_set(&button_pressed, 0);
+    snprintf(msg, sizeof(msg), "%d", atomic_read(&last_button));
     ret = copy_to_user(buffer, msg, strlen(msg) + 1);
     if (ret) {
         return -EFAULT;
@@ -45,9 +45,9 @@ static struct file_operations fops = {
 
 // ISR for button interrupts
 static irqreturn_t button_isr(int irq, void *dev_id) {
-    last_button = *(int *)dev_id; // Retrieve button ID
+    atomic_set(&last_button, *(int *)dev_id); // Retrieve button ID
     printk(KERN_INFO "Received interrupt for button #%d\n", last_button);
-    button_pressed = 1;          // Notify wait queue
+    atomic_set(&button_pressed, 1);          // Notify wait queue
     wake_up_interruptible(&wait_queue);
     return IRQ_HANDLED;
 }
