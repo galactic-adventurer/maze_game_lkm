@@ -3,7 +3,6 @@
 #include "buttons_lib.h"
 #include "game_config.h"
 #include "mazes.h"
-#include <stdatomic.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <signal.h>
@@ -17,14 +16,14 @@ volatile sig_atomic_t process = 1;
 
 uint16_t mazes [LEVELS][LCD_HEIGHT][LCD_WIDTH];
 uint16_t init_ball_poses [LEVELS][2] = {{11, 144}, {150, 20}, {30, 120}};
-atomic_bool restart = ATOMIC_VAR_INIT(true);
-atomic_int new_level = ATOMIC_VAR_INIT(0);
+bool restart = true;
+int new_level = 1;
 pthread_mutex_t restart_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t restart_cond = PTHREAD_COND_INITIALIZER;
 
 void wait_for_restart() {
     pthread_mutex_lock(&restart_mutex);
-    while (!atomic_load(&restart)) {
+    while (!restart) {
         pthread_cond_wait(&restart_cond, &restart_mutex);
     }
     pthread_mutex_unlock(&restart_mutex);
@@ -34,9 +33,9 @@ void * button_press_handler(void *arg) {
     while (1)
     {
         int button = get_button_pressed();
-        atomic_store(&new_level, button-1);
-        atomic_store(&restart, true);
-	pthread_mutex_lock(&restart_mutex);
+        pthread_mutex_lock(&restart_mutex);
+        new_level = button-1;
+        restart = true;
     	pthread_cond_signal(&restart_cond);
     	pthread_mutex_unlock(&restart_mutex);
     }
@@ -80,13 +79,15 @@ static uint16_t last_valid_ball_pose [2];
 
     while (1)
     {
-        if (atomic_load(&restart)) {
+        pthread_mutex_lock(&restart_mutex);
+        if (restart) {
 	    printf("restart\n");
-            level = atomic_load(&new_level);
+            level = new_level;
+            restart = false;
         memcpy(ball_pose, init_ball_poses[level], 2 * sizeof(init_ball_poses[level][0]));
-	memset(ball_velocity, 0, 4);
-	atomic_store(&restart, false);
+	    memset(ball_velocity, 0, 4);
         }
+        pthread_mutex_unlock(&restart_mutex);
 
         get_accel(&accel_values[0]);
         ball_velocity[0] = ball_velocity[0] + -1 * accel_values[0]/5000;
